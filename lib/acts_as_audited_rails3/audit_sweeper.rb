@@ -22,11 +22,15 @@ end
 class AuditSweeper < ActionController::Caching::Sweeper #:nodoc:
   observe Audit
   def before_create(audit)
-    audit.user ||= current_actor
+    audit.user ||= acts_as_audited_user
   end
 
-  def current_actor
-    controller.send :current_actor if controller.respond_to?(:current_actor, true)
+  def acts_as_audited_user
+    if controller.respond_to?(:acts_as_audited_user, true)
+      controller.send :acts_as_audited_user
+    elsif controller.respond_to?(:current_user, true)
+      controller.send :current_user
+    end
   end
 end
 
